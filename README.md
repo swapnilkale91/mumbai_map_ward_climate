@@ -24,7 +24,7 @@ Mumbai has 24 administrative wards (A–T). T-ward (Mulund) is `gid=13, name="T"
 ```
 python/etl/
   fetch_boundary.py    ← Step 1: download & validate BMC ward GeoJSON, isolate T-ward
-  fetch_lst.py         ← Step 2 (TODO): pull Landsat LST via GEE for T-ward bbox
+  fetch_lst.py         ← Step 2: Landsat 8/9 C2L2 dry-season LST composite for T-ward (GEE)
   fetch_osm_green.py   ← Step 3 (TODO): pull OSM green polygons via Overpass
 python/viz/
   preview_boundary.py  ← sanity-check map: 24 wards, T-ward highlighted → output/t_ward_preview.png
@@ -34,8 +34,9 @@ python/viz/
 
 ```bash
 pip install -r requirements.txt
-# Authenticate GEE once:
+# Authenticate GEE once (needs a Cloud project):
 earthengine authenticate
+export EE_PROJECT=your-gcp-project
 ```
 
 ## Running the T-ward spike
@@ -47,4 +48,9 @@ python python/etl/fetch_boundary.py
 
 python python/viz/preview_boundary.py
 # Outputs: output/t_ward_preview.png   (24 wards, T-ward highlighted)
+
+python python/etl/fetch_lst.py
+# Outputs: data/raw/t_ward_lst.tif            (30 m LST GeoTIFF, °C)
+#          output/t_ward_lst_quicklook.png    (colour ramp 24→42 °C)
+# Options: --start / --end to widen the scene window; --no-tif to skip the download
 ```

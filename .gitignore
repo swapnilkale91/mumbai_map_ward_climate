@@ -8,6 +8,7 @@ dist/
 .ipynb_checkpoints/
 data/raw/*.geojson
 data/raw/*.tif
+data/raw/*.tiff
 data/raw/*.csv
 output/*.png
 output/*.html
