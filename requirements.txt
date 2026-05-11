@@ -1,0 +1,7 @@
+requests>=2.31
+geojson>=3.1
+geopandas>=0.14
+earthengine-api>=0.1.390
+folium>=0.16
+matplotlib>=3.8
+shapely>=2.0
