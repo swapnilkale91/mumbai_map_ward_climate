@@ -9,5 +9,8 @@ dist/
 data/raw/*.geojson
 data/raw/*.tif
 data/raw/*.csv
-# keep the directory
+output/*.png
+output/*.html
+# keep the directories
 !data/raw/.gitkeep
+!output/.gitkeep

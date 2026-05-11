@@ -23,9 +23,11 @@ Mumbai has 24 administrative wards (A–T). T-ward (Mulund) is `gid=13, name="T"
 
 ```
 python/etl/
-  fetch_boundary.py   ← Step 1: download & validate BMC ward GeoJSON, isolate T-ward
-  fetch_lst.py        ← Step 2 (TODO): pull Landsat LST via GEE for T-ward bbox
-  fetch_osm_green.py  ← Step 3 (TODO): pull OSM green polygons via Overpass
+  fetch_boundary.py    ← Step 1: download & validate BMC ward GeoJSON, isolate T-ward
+  fetch_lst.py         ← Step 2 (TODO): pull Landsat LST via GEE for T-ward bbox
+  fetch_osm_green.py   ← Step 3 (TODO): pull OSM green polygons via Overpass
+python/viz/
+  preview_boundary.py  ← sanity-check map: 24 wards, T-ward highlighted → output/t_ward_preview.png
 ```
 
 ## Setup
@@ -42,4 +44,7 @@ earthengine authenticate
 python python/etl/fetch_boundary.py
 # Outputs: data/raw/bmc_wards.geojson  (full 24-ward file)
 #          data/raw/t_ward.geojson      (T-ward polygon only)
+
+python python/viz/preview_boundary.py
+# Outputs: output/t_ward_preview.png   (24 wards, T-ward highlighted)
 ```
