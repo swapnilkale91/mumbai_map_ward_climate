@@ -25,9 +25,10 @@ Mumbai has 24 administrative wards (A–T). T-ward (Mulund) is `gid=13, name="T"
 python/etl/
   fetch_boundary.py    ← Step 1: download & validate BMC ward GeoJSON, isolate T-ward
   fetch_lst.py         ← Step 2: Landsat 8/9 C2L2 dry-season LST composite for T-ward (GEE)
-  fetch_osm_green.py   ← Step 3 (TODO): pull OSM green polygons via Overpass
+  fetch_osm_green.py   ← Step 3: OSM green cover (parks/forest/SGNP edge) via Overpass
 python/viz/
   preview_boundary.py  ← sanity-check map: 24 wards, T-ward highlighted → output/t_ward_preview.png
+  plot_lst.py          ← payoff figure: LST map + green overlay + W→E transect → output/t_ward_lst_green.png
 ```
 
 ## Setup
@@ -53,4 +54,10 @@ python python/etl/fetch_lst.py
 # Outputs: data/raw/t_ward_lst.tif            (30 m LST GeoTIFF, °C)
 #          output/t_ward_lst_quicklook.png    (colour ramp 24→42 °C)
 # Options: --start / --end to widen the scene window; --no-tif to skip the download
+
+python python/etl/fetch_osm_green.py
+# Outputs: data/raw/t_ward_green.geojson      (parks / forest / SGNP-edge polygons)
+
+python python/viz/plot_lst.py
+# Outputs: output/t_ward_lst_green.png        (LST map + green overlay + W→E transect)
 ```
