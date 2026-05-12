@@ -7,3 +7,7 @@ matplotlib>=3.8
 shapely>=2.0
 rasterio>=1.3
 numpy>=1.24
+# On Debian/Ubuntu the system cryptography build can break google-auth's cffi backend.
+# Installing these via pip ensures the pip-built wheels take precedence.
+cffi>=1.16
+cryptography>=42.0
