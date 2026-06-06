@@ -1,0 +1,26 @@
+{
+  "name": "rag-learning-week",
+  "version": "0.1.0",
+  "description": "One-week RAG MVP: embeddings, pgvector, claim verification, user model, evals",
+  "scripts": {
+    "setup-db": "tsx scripts/setup-db.ts",
+    "ingest": "tsx scripts/ingest-docs.ts",
+    "day1": "tsx src/day1-2/answer.ts",
+    "day3": "tsx src/day3/verify.ts",
+    "day4": "tsx src/day4/extract.ts",
+    "day5": "tsx src/day5/remediate.ts",
+    "eval": "tsx src/day5/evals.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.30.0",
+    "openai": "^4.65.0",
+    "pg": "^8.13.0",
+    "pgvector": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
