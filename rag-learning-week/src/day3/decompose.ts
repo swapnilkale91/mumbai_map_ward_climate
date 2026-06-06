@@ -38,9 +38,8 @@ export async function decomposeClaims(answerText: string): Promise<Claim[]> {
     .join("")
     .trim();
 
-  // Strip markdown code fences if present
-  const jsonStr = raw.replace(/^```(?:json)?\n?/, "").replace(/\n?```$/, "");
-
-  const parsed = JSON.parse(jsonStr) as { claims: Claim[] };
-  return parsed.claims;
+  const jsonMatch = raw.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) return [];
+  const parsed = JSON.parse(jsonMatch[0]) as { claims: Claim[] };
+  return parsed.claims ?? [];
 }

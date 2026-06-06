@@ -1,23 +1,26 @@
 -- ────────────────────────────────────────────────
--- 0. Extension
+-- 0. Extension (kept for when neural embeddings are re-enabled)
 -- ────────────────────────────────────────────────
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- ────────────────────────────────────────────────
--- 1. Day 1-2: document chunks + embeddings
+-- 1. Day 1-2: document chunks + full-text search
+--    search_vector is a generated tsvector column — Postgres FTS replaces
+--    neural embeddings when the OpenAI endpoint is not reachable.
+--    To switch back to pgvector: add `embedding vector(1536)` and update
+--    retrieve.ts to use cosine distance instead of ts_rank.
 -- ────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS documents (
-  id          BIGSERIAL PRIMARY KEY,
-  source      TEXT NOT NULL,          -- filename, e.g. "01-ml-basics.md"
-  chunk_index INT  NOT NULL,          -- 0-based within source
-  content     TEXT NOT NULL,          -- raw chunk text
-  embedding   vector(1536),           -- text-embedding-3-small
-  created_at  TIMESTAMPTZ DEFAULT NOW()
+  id             BIGSERIAL PRIMARY KEY,
+  source         TEXT NOT NULL,
+  chunk_index    INT  NOT NULL,
+  content        TEXT NOT NULL,
+  search_vector  tsvector GENERATED ALWAYS AS (to_tsvector('english', content)) STORED,
+  created_at     TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS documents_embedding_idx
-  ON documents USING ivfflat (embedding vector_cosine_ops)
-  WITH (lists = 50);
+CREATE INDEX IF NOT EXISTS documents_fts_idx
+  ON documents USING GIN (search_vector);
 
 -- ────────────────────────────────────────────────
 -- 2. Day 3: claim verification log

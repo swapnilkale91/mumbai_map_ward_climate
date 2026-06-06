@@ -1,34 +1,46 @@
+/**
+ * Retrieval via Postgres full-text search (ts_rank).
+ *
+ * This is a lexical retriever — it finds chunks that share keywords with the
+ * query.  The interface is identical to the neural (pgvector cosine) version,
+ * so swapping back is a one-file change once OpenAI is reachable.
+ */
 import { query } from "../db/client.js";
-import { embedOne } from "./embed.js";
-import pgvector from "pgvector/pg";
 
 export interface RetrievedChunk {
   id: number;
   source: string;
   chunk_index: number;
   content: string;
-  score: number; // cosine similarity 0–1 (higher = more relevant)
+  score: number;
 }
 
-/**
- * Embed the query, then return the top-k most similar document chunks.
- * Uses pgvector's <=> operator (cosine distance); score = 1 - distance.
- */
 export async function retrieve(
   queryText: string,
   topK = Number(process.env.TOP_K ?? 5)
 ): Promise<RetrievedChunk[]> {
-  const vec = await embedOne(queryText);
-  const sql = pgvector.toSql(vec);
-
-  const rows = await query<RetrievedChunk & { distance: number }>(
+  const rows = await query<RetrievedChunk>(
     `SELECT id, source, chunk_index, content,
-            1 - (embedding <=> $1::vector) AS score
+            ts_rank(search_vector, plainto_tsquery('english', $1)) AS score
      FROM documents
-     ORDER BY embedding <=> $1::vector
+     WHERE search_vector @@ plainto_tsquery('english', $1)
+     ORDER BY score DESC
      LIMIT $2`,
-    [sql, topK]
+    [queryText, topK]
   );
 
-  return rows.map(({ distance: _d, ...r }) => r);
+  // Fallback: if the strict tsquery matches nothing (e.g. single-word after
+  // stop-word stripping), return the top-K by recency so the pipeline always
+  // has context to work with.
+  if (rows.length === 0) {
+    const fallback = await query<RetrievedChunk>(
+      `SELECT id, source, chunk_index, content, 0.01 AS score
+       FROM documents ORDER BY id LIMIT $1`,
+      [topK]
+    );
+    return fallback.map((r) => ({ ...r, score: Number(r.score) }));
+  }
+
+  // pg returns numeric/real columns as strings; coerce to number
+  return rows.map((r) => ({ ...r, score: Number(r.score) }));
 }

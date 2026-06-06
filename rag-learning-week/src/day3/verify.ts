@@ -62,14 +62,14 @@ async function verifyClaim(
     ],
   });
 
-  const raw = message.content
+  const rawText = message.content
     .filter((b) => b.type === "text")
     .map((b) => (b as Anthropic.TextBlock).text)
-    .join("")
-    .replace(/^```(?:json)?\n?/, "")
-    .replace(/\n?```$/, "");
+    .join("");
 
-  const parsed = JSON.parse(raw) as { verdict: Verdict; explanation: string };
+  const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) return { claim: claim.text, verdict: "uncertain" as Verdict, explanation: "Parse error", evidence_sources: [] };
+  const parsed = JSON.parse(jsonMatch[0]) as { verdict: Verdict; explanation: string };
 
   // Persist to DB
   await query(

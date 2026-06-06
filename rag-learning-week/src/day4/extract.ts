@@ -43,14 +43,15 @@ export async function extractAndSaveTraits(
     ],
   });
 
-  const raw = message.content
+  const rawText = message.content
     .filter((b) => b.type === "text")
     .map((b) => (b as Anthropic.TextBlock).text)
-    .join("")
-    .replace(/^```(?:json)?\n?/, "")
-    .replace(/\n?```$/, "");
+    .join("");
 
-  const parsed = JSON.parse(raw) as { traits: UserTrait[] };
+  // Extract the first {...} block to handle stray text around the JSON
+  const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) return [];
+  const parsed = JSON.parse(jsonMatch[0]) as { traits: UserTrait[] };
   const traits = parsed.traits ?? [];
 
   if (traits.length > 0) {
